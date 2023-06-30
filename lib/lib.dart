@@ -320,11 +320,15 @@ class Lib {
 
     NativeLibrary llamasherpaBinded = NativeLibrary(llamasherpa);
     var ret = llamasherpaBinded.llamasherpa_start(filePath.toNativeUtf8().cast<Char>(), prompt.toNativeUtf8().cast<Char>(), stopToken.trim().toNativeUtf8().cast<Char>(), show_output);
+      // process the prompt
+      llamasherpaBinded.llamasherpa_continue("".toNativeUtf8().cast<Char>(), show_output);
 
     while (true) {
+      // ask for user input
       mainSendPort?.send(MessageCanPrompt());
       String buffer = await interaction.future;
       interaction = Completer();
+      // process user input
       llamasherpaBinded.llamasherpa_continue(buffer.toNativeUtf8().cast<Char>(), show_output);
     }
 
