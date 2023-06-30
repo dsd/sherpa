@@ -18,39 +18,57 @@ class NativeLibrary {
           lookup)
       : _lookup = lookup;
 
-  int llamasherpa_process(
+  int llamasherpa_start(
     ffi.Pointer<ffi.Char> model_path,
     ffi.Pointer<ffi.Char> _prompt,
     ffi.Pointer<ffi.Char> _antiprompt,
-    ffi.Pointer<get_input_cb> get_input,
     ffi.Pointer<show_output_cb> show_output,
   ) {
-    return _llamasherpa_process(
+    return _llamasherpa_start(
       model_path,
       _prompt,
       _antiprompt,
-      get_input,
       show_output,
     );
   }
 
-  late final _llamasherpa_processPtr = _lookup<
+  late final _llamasherpa_startPtr = _lookup<
       ffi.NativeFunction<
           ffi.Int Function(
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
               ffi.Pointer<ffi.Char>,
-              ffi.Pointer<get_input_cb>,
-              ffi.Pointer<show_output_cb>)>>('llamasherpa_process');
-  late final _llamasherpa_process = _llamasherpa_processPtr.asFunction<
-      int Function(
-          ffi.Pointer<ffi.Char>,
-          ffi.Pointer<ffi.Char>,
-          ffi.Pointer<ffi.Char>,
-          ffi.Pointer<get_input_cb>,
-          ffi.Pointer<show_output_cb>)>();
+              ffi.Pointer<show_output_cb>)>>('llamasherpa_start');
+  late final _llamasherpa_start = _llamasherpa_startPtr.asFunction<
+      int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+          ffi.Pointer<ffi.Char>, ffi.Pointer<show_output_cb>)>();
+
+  int llamasherpa_continue(
+    ffi.Pointer<ffi.Char> input,
+    ffi.Pointer<show_output_cb> show_output,
+  ) {
+    return _llamasherpa_continue(
+      input,
+      show_output,
+    );
+  }
+
+  late final _llamasherpa_continuePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Int Function(ffi.Pointer<ffi.Char>,
+              ffi.Pointer<show_output_cb>)>>('llamasherpa_continue');
+  late final _llamasherpa_continue = _llamasherpa_continuePtr.asFunction<
+      int Function(ffi.Pointer<ffi.Char>, ffi.Pointer<show_output_cb>)>();
+
+  void llamasherpa_exit() {
+    return _llamasherpa_exit();
+  }
+
+  late final _llamasherpa_exitPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function()>>('llamasherpa_exit');
+  late final _llamasherpa_exit =
+      _llamasherpa_exitPtr.asFunction<void Function()>();
 }
 
-typedef get_input_cb = ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>;
 typedef show_output_cb
     = ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>;

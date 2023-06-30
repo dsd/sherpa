@@ -279,16 +279,6 @@ class Lib {
 
   static Completer interaction = Completer();
 
-  static Pointer<Char> getInput() {
-     log("GETINPUT!");
-// OOPS: can't do the await in this function as it is not async.
-// need to rework the approach.
-//          mainSendPort?.send(MessageCanPrompt());
-//          String buffer = await interaction.future;
-//     return buffer.toNativeUtf8().cast<Char>();
-return "".toNativeUtf8().cast<Char>();
-  }
-
   static void showOutput(Pointer<Char> output) {
     logInline(output.cast<Utf8>().toDartString());
   }
@@ -324,12 +314,21 @@ return "".toNativeUtf8().cast<Char>();
     }
 
     var prompt = parsingDemand.promptPassed;
+    interaction = Completer();
 
-    Pointer<get_input_cb> get_input = Pointer.fromFunction(getInput);
     Pointer<show_output_cb> show_output = Pointer.fromFunction(showOutput);
 
     NativeLibrary llamasherpaBinded = NativeLibrary(llamasherpa);
-    var ret = llamasherpaBinded.llamasherpa_process(filePath.toNativeUtf8().cast<Char>(), prompt.toNativeUtf8().cast<Char>(), stopToken.trim().toNativeUtf8().cast<Char>(), get_input, show_output);
+    var ret = llamasherpaBinded.llamasherpa_start(filePath.toNativeUtf8().cast<Char>(), prompt.toNativeUtf8().cast<Char>(), stopToken.trim().toNativeUtf8().cast<Char>(), show_output);
+
+    while (true) {
+      mainSendPort?.send(MessageCanPrompt());
+      String buffer = await interaction.future;
+      interaction = Completer();
+      llamasherpaBinded.llamasherpa_continue(buffer.toNativeUtf8().cast<Char>(), show_output);
+    }
+
+    llamasherpaBinded.llamasherpa_exit();
   }
 
   void main() {}
